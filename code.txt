@@ -1,0 +1,100 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+struct Product {
+    string name;
+    double price;
+    int quantity;
+
+    Product(string n, double p, int q) : name(n), price(p), quantity(q) {}
+};
+
+class Cart {
+private:
+    vector<Product> products;
+
+public:
+    void addToCart() {
+        string name;
+        double price;
+        int quantity;
+
+        cout << "Enter product name: ";
+        cin >> name;
+        cout << "Enter price: $";
+        cin >> price;
+        cout << "Enter quantity: ";
+        cin >> quantity;
+
+        products.push_back(Product(name, price, quantity));
+    }
+
+    void removeFromCart() {
+        string name;
+        cout << "Enter the name of the product you want to remove: ";
+        cin >> name;
+
+        for (auto it = products.begin(); it != products.end(); ++it) {
+            if (it->name == name) {
+                products.erase(it);
+                cout << "Product removed successfully." << endl;
+                return;
+            }
+        }
+        cout << "Product not found in the cart." << endl;
+    }
+
+    double calculateTotalPrice() {
+        double total = 0;
+        for (const auto& product : products) {
+            total += product.price * product.quantity;
+        }
+        return total;
+    }
+
+    void displayCart() {
+        if (products.empty()) {
+            cout << "Your cart is empty." << endl;
+            return;
+        }
+
+        cout << "Products in your cart:" << endl;
+        for (const auto& product : products) {
+            cout << product.name << " - $" << product.price << " x " << product.quantity << endl;
+        }
+        cout << "Total price: $" << calculateTotalPrice() << endl;
+    }
+};
+
+int main() {
+    Cart cart;
+    int choice;
+
+    do {
+        cout << "\nMenu:\n1. Add to cart\n2. Remove from cart\n3. Display cart\n4. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cart.addToCart();
+                break;
+            case 2:
+                cart.removeFromCart();
+                break;
+            case 3:
+                cart.displayCart();
+                break;
+            case 4:
+                cout << "Exiting...";
+                break;
+            default:
+                cout << "Invalid choice. Please try again.";
+        }
+    } while (choice != 4);
+
+    return 0;
+}
