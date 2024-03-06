@@ -1,100 +1,130 @@
 #include <iostream>
-#include <vector>
-#include <string>
-
+#include <cstring>
 using namespace std;
 
-struct Product {
+struct Item {
     string name;
-    double price;
     int quantity;
-
-    Product(string n, double p, int q) : name(n), price(p), quantity(q) {}
+    int price;
+    Item* next;
 };
 
-class Cart {
+class ShoppingCart {
 private:
-    vector<Product> products;
-
+    Item* head;
+    int total_price;
 public:
-    void addToCart() {
-        string name;
-        double price;
-        int quantity;
+    ShoppingCart();
+    void addItem(string name, int quantity, int price);
+    void removeItem(string name, int quantity);
+    int getTotal();
+    void displayItems();
+};
 
-        cout << "Enter product name: ";
-        cin >> name;
-        cout << "Enter price: $";
-        cin >> price;
-        cout << "Enter quantity: ";
-        cin >> quantity;
+ShoppingCart::ShoppingCart() {
+    cout << "Creating a new shopping cart" << endl;
+    head = nullptr;
+    total_price = 0;
+}
 
-        products.push_back(Product(name, price, quantity));
+void ShoppingCart::addItem(string name, int quantity, int price) {
+    Item* newItem = new Item;
+    newItem->name = name;
+    newItem->quantity = quantity;
+    newItem->price = price;
+    newItem->next = nullptr;
+
+    if (head == nullptr) {
+        head = newItem;
+    } else {
+        Item* current = head;
+        while (current->next != nullptr) {
+            current = current->next;
+        }
+        current->next = newItem;
     }
+}
 
-    void removeFromCart() {
-        string name;
-        cout << "Enter the name of the product you want to remove: ";
-        cin >> name;
+void ShoppingCart::removeItem(string name, int quantity) {
+    Item* current = head;
+    Item* prev = nullptr;
 
-        for (auto it = products.begin(); it != products.end(); ++it) {
-            if (it->name == name) {
-                products.erase(it);
-                cout << "Product removed successfully." << endl;
+    while (current != nullptr) {
+        if (current->name == name) {
+            if (current->quantity >= quantity) {
+                current->quantity -= quantity;
+                if (current->quantity == 0) {
+                    if (prev == nullptr) {
+                        head = current->next;
+                    } else {
+                        prev->next = current->next;
+                    }
+                    delete current;
+                }
+                return;
+            } else {
+                cout << "Not enough items present in the cart to be removed" << endl;
                 return;
             }
         }
-        cout << "Product not found in the cart." << endl;
+        prev = current;
+        current = current->next;
     }
+    cout << "This item is not present in the cart" << endl;
+}
 
-    double calculateTotalPrice() {
-        double total = 0;
-        for (const auto& product : products) {
-            total += product.price * product.quantity;
-        }
-        return total;
+int ShoppingCart::getTotal() {
+    total_price = 0;
+    Item* current = head;
+    while (current != nullptr) {
+        total_price += current->quantity * current->price;
+        current = current->next;
     }
+    return total_price;
+}
 
-    void displayCart() {
-        if (products.empty()) {
-            cout << "Your cart is empty." << endl;
-            return;
-        }
-
-        cout << "Products in your cart:" << endl;
-        for (const auto& product : products) {
-            cout << product.name << " - $" << product.price << " x " << product.quantity << endl;
-        }
-        cout << "Total price: $" << calculateTotalPrice() << endl;
+void ShoppingCart::displayItems() {
+    cout << "Items in the shopping cart:" << endl;
+    Item* current = head;
+    while (current != nullptr) {
+        cout << current->name << " - Quantity: " << current->quantity << " - Price: $" << current->price << endl;
+        current = current->next;
     }
-};
+}
 
 int main() {
-    Cart cart;
+    ShoppingCart cart;
     int choice;
+    string name;
+    int quantity, price;
 
     do {
-        cout << "\nMenu:\n1. Add to cart\n2. Remove from cart\n3. Display cart\n4. Exit\n";
-        cout << "Enter your choice: ";
+        cout << "Menu:\n1. Add Item\n2. Remove Item\n3. Display Total Cost\n4. Display Items in Cart\n5. Exit\nEnter your choice: ";
         cin >> choice;
-
         switch (choice) {
             case 1:
-                cart.addToCart();
+                cout << "Enter item name, quantity, and price: ";
+                cin >> name >> quantity >> price;
+                cart.addItem(name, quantity, price);
                 break;
             case 2:
-                cart.removeFromCart();
+                cout << "Enter item name and quantity to remove: ";
+                cin >> name >> quantity;
+                cart.removeItem(name, quantity);
                 break;
             case 3:
-                cart.displayCart();
+                cout << "Total cost: $" << cart.getTotal() << endl;
                 break;
             case 4:
-                cout << "Exiting...";
+                cart.displayItems();
+                break;
+            case 5:
+                cout << "Exiting program..." << endl;
                 break;
             default:
-                cout << "Invalid choice. Please try again.";
+                cout << "Invalid choice. Please try again." << endl;
         }
-    } while (choice != 4);
+    } while (choice != 5);
 
     return 0;
 }
